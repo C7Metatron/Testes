@@ -1,0 +1,154 @@
+  local notification = Instance.new("Sound")
+  notification.Parent = game:GetService("SoundService")
+  notification.SoundId = "rbxassetid://9086208751"
+  notification.Volume = 10
+  notification:Play()
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+local notif = loadstring(game:HttpGet("https://raw.githubusercontent.com/C7Metatron/MetatronX-Project/main/NotificationUI"))()
+function notify(MetatronX,title,description,icon,color)
+    notif:message {
+        Title = MetatronX.." | <font color='rgb(".. color ..")'>"..title.."</font>",
+        Description = description,
+        Icon = icon
+    }
+end
+notify("MetatronX Hub","Initiating","Loading MetatronX Hub!",7743870134,"255, 100, 100")
+local Window = Fluent:CreateWindow({
+    Title = "🥋 MetatronX Hub 👑 ",
+    SubTitle = "By Metatron 👾",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.K -- Used when theres no MinimizeKeybind
+})
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "rbxassetid://7743870134" }),
+    Player = Window:AddTab({ Title = "Player", Icon = "rbxassetid://10723345749" }),
+    Misc = Window:AddTab({ Title = "Misc", Icon = "rbxassetid://10723376114" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+Tabs.Player:AddParagraph({
+    Title = "Your Risk ❗",
+    Content = "Essas Opcões Podem Ser Detectadas.\nUse Por Sua Conta Em Risco 🚨"
+})
+
+local Slider = Tabs.Player:AddSlider("WalkSpeed Changer", {
+    Title = "WalkSpeed",
+    Description = "Mude A Velocidade Que Voce Se Move",
+    Default = 16,
+    Min = 16,
+    Max = 100,
+    Rounding = 1,
+    Callback = function(speed)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
+    end
+})
+local Slider = Tabs.Player:AddSlider("JumpPower Changer", {
+    Title = "JumpPower",
+    Description = "Mude A Força Do Jump",
+    Default = 50,
+    Min = 50,
+    Max = 250,
+    Rounding = 1,
+    Callback = function(JumpPower)
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = JumpPower
+    end
+})
+Tabs.Player:AddButton({
+    Title = "Block Fly",
+    Description = "Um Fly Com Um Sistema De Bypass Simples",
+    Callback = function()
+        Window:Dialog({
+            Title = "AVISO ❗",
+            Content = "Apos Confirmar So e Posivel Desabilitar Caso Voce Reset",
+            Buttons = {
+                {
+                    Title = "Confirm",
+                    Callback = function()
+                        local player = game.Players.LocalPlayer
+                        local character = player.Character or player.CharacterAdded:Wait()
+                        
+                        local block = Instance.new("Part")
+                        block.Size = Vector3.new(10, 1, 10) -- Adjust the size as needed
+                        block.Anchored = true
+                        block.Transparency = 0.1
+                        block.Parent = workspace
+                        
+                        local runService = game:GetService("RunService")
+                        
+                        local function rainbowColor(t)
+                            local frequency = 0.5 -- Adjust the frequency to control the speed of the color change
+                            local r = math.sin(frequency*t + 0) * 127 + 128
+                            local g = math.sin(frequency*t + 2*math.pi/3) * 127 + 128
+                            local b = math.sin(frequency*t + 4*math.pi/3) * 127 + 128
+                            return Color3.new(r/255, g/255, b/255)
+                        end
+                        
+                        local function updateColor()
+                            while true do
+                                local t = tick()
+                                block.BrickColor = BrickColor.new(rainbowColor(t))
+                                wait(0.1)
+                            end
+                        end
+                        
+                        coroutine.wrap(updateColor)()
+                        
+                        local function checkAirborne()
+                            while true do
+                                if character and character:FindFirstChild("Humanoid") then
+                                    local humanoid = character.Humanoid
+                                    if humanoid:GetState() == Enum.HumanoidStateType.Seated then
+                                        local targetPosition = character.HumanoidRootPart.Position + Vector3.new(0, -5, 0)
+                                        block.CFrame = CFrame.new(targetPosition)
+                                    else
+                                        block.CFrame = CFrame.new(character.HumanoidRootPart.Position) * CFrame.new(0, -5, 0)
+                                    end
+                                end
+                                wait(0.1)
+                            end
+                        end
+                
+                        checkAirborne()
+                        Fluent:Notify({
+                            Title = "Fly On",
+                            Content = "A Funcão Foi Iniciada.",
+                            Duration = 8
+                        })
+                        
+                    end
+                },
+                {
+                    Title = "Cancel",
+                    Callback = function()
+                        print("Cancelled the dialog.")
+                    end
+                }
+            }
+        })
+    end
+})
+
+
+
+--// FINAL
+local Options = Fluent.Options
+
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+
+SaveManager:IgnoreThemeSettings()
+
+SaveManager:SetIgnoreIndexes({})
+
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/specific-game")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+
+Window:SelectTab(1)
